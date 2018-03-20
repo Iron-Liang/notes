@@ -70,4 +70,32 @@ git commit -m "remove test.txt"
 
 ## 远程仓库
 
+### 关联远程仓库
 
+`git remote add origin git@server-name:path/repo-name.gi`: 关联一个远程库
+
+`git push -u origin master`: 第一次推送master分支，`-u`参数可以关联本地master和远程master
+
+`git push origin master`: 推送最新修改
+
+### 从远程仓库克隆
+
+`git clone https://github.com/path/repo-name.git`
+
+## 分支管理
+
+### `git branch dev`
+
+创建dev分支
+
+### `git checkout dev`
+
+切换到dev分支
+
+### `git checkout -b dev`
+
+创建并切换到dev分支
+
+### `git branch`
+
+查看分支
