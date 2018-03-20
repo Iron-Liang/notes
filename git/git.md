@@ -36,6 +36,8 @@
 
 `git log --pretty=online` 格式化输出日志
 
+`--graph` 参数可以看到分支合并图
+
 ### `git reset`
 
 `git reset --hard HEAD^`: 回退到上一个版本
@@ -99,3 +101,13 @@ git commit -m "remove test.txt"
 ### `git branch`
 
 查看分支
+
+### `git merge dev`
+
+合并dev分支到当前分支
+
+`--no-ff` 参数可以禁用 *Fast forward* 模式的合并，在merge时生成一个新的commit，这样从分支历史上就可以看出分支信息
+
+### `git branch -d dev`
+
+删除dev分支
