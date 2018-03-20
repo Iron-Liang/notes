@@ -27,9 +27,47 @@
 ### `git diff`
 
 查看difference，比较本地文件和版本库文件的修改
+
+`git diff HEAD -- readme.txt`：查看工作区和版本库里面最新版本的区别
 
 ### `git log`
 
 显示从最近到最远的提交日志
 
 `git log --pretty=online` 格式化输出日志
+
+### `git reset`
+
+`git reset --hard HEAD^`: 回退到上一个版本
+
+- `HEAD^`: 上一版本
+- `HEAD^^`: 上两个版本
+- `HEAD~100`: 上一百个版本
+
+`git reset --hard 724b042`: 回退到指定版本号版本
+
+### `git reflog`
+
+查看每次命令
+
+### `git checkout`
+
+使用版本库的版本替换工作区版本
+
+`git checkout -- readme.txt`: 把`readme.txt`在工作区的修改全部撤销，两种情况：
+
+1. `readme.txt`自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态
+2. `readme.txt`已经添加到暂存区，又做了修改，撤销修改就回到添加到暂存区后的状态
+
+### `git rm`
+
+删除文件
+
+```shell
+git rm test.txt
+git commit -m "remove test.txt"
+```
+
+## 远程仓库
+
+
