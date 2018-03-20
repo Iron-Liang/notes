@@ -111,3 +111,41 @@ git commit -m "remove test.txt"
 ### `git branch -d dev`
 
 删除dev分支
+
+`git branch -D dev`：强行删除一个没有合并过的分支
+
+### `git stash`
+
+保存工作区现场
+
+### `git stash list`
+
+查看保存的工作区现场
+
+### `git stash apply`
+
+恢复工作区现场但不删除stash
+
+### `git stash drop`
+
+删除工作区现场stash
+
+### `git stash pop`
+
+恢复并删除工作区现场stash
+
+### `git push origin branch`
+
+推送分支到远程库
+
+### `git checkout -b branch origin/branch`
+
+同步远程分支到本地
+
+### `git branch --set-upstream dev origin/dev`
+
+指定本地分支和远程分支的链接
+
+### `git pull`
+
+从远程仓库抓取分支
