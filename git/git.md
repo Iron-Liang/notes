@@ -149,3 +149,37 @@ git commit -m "remove test.txt"
 ### `git pull`
 
 从远程仓库抓取分支
+
+## 标签管理
+
+### `git tag <name>`
+
+打一个新的标签
+
+`git tag v0.9 6224937`: 为commit id是*6224937*的修改打标签
+
+`-a`: 参数指定标签名
+`-m`: 指定说明文字
+`-s`: 私钥签名一个标签
+
+### `git tag`
+
+查看标签
+
+### `git show <tagname>`
+
+查看标签说明文字
+
+### `git tag -d v0.1`
+
+删除标签
+
+### `git push origin <tagname>`
+
+推送标签到远程库
+
+`--tags`: 参数一次性推送全部尚未推送到远程的本地标签
+
+### `git push origin :refs/tags/v0.9`
+
+删除远程库的标签（要先删除本地标签）
