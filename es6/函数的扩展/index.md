@@ -220,3 +220,333 @@ const mult2 = a => a * 2
 const addThenMult = pipeline(plus1, mult2)
 addThenMult(5) // 12
 ```
+
+## 双冒号运算符
+
+提案，“函数绑定”运算符（function bind），用来取代`call`、`apply`、`bind`
+
+`::`左边是一个对象，右边是一个函数。该运算符将左边的对象作为上下文（即`this`对象），绑定到右边的函数上。
+
+```javascript
+foo::bar
+// 等同于
+bar.bind(foo)
+
+foo::bar(...arguments)
+// 等同于
+bar.apply(foo, arguments)
+```
+
+如果冒号左边为空，右边是一个对象的方法，则等于将该方法绑定在该对象上面
+
+```javascript
+var method = obj::obj.foo
+// 等同于
+var method = ::obj.foo
+
+let log = ::conole.log
+// 等同于
+let log = console.log.bind(console)
+```
+
+如果双冒号运算符的运算结果，还是一个对象，可以采用链式写法
+
+```javascript
+import { map, takeWhile, forEach } from 'iterlib'
+
+getPlayers()
+::map(x => x.character())
+::takeWhile(x => x.strength > 100)
+::forEach(x => console.log(x))
+```
+
+## 尾调用优化
+
+尾调用（Tail Call），指某个函数的最后一步是调用另外一个函数。
+
+```javascript
+function f(x) {
+    return g(x)
+}
+```
+
+```javascript
+function f(x) {
+    g(x)
+}
+
+// 等同于
+
+function f(x) {
+    g(x)
+    return undefined
+}
+
+/*
+    不属于尾调用
+*/
+```
+
+**尾调用优化**
+
+尾调用与其它调用不同之处
+
+*函数调用在内存中形成一个“调用记录”，称为“调用帧”（call frame），用来保存调用位置和内部变量信息。如果函数A内部调用函数B，那么A的调用帧上方，还会形成一个B的调用帧。等到B运行结束，将结果返回到A，B的调用帧才会消失。如果函数B内部还调用了函数C，那就还有一个C的调用帧，以此类推。所有的调用帧就形成了一个“调用栈”（call stack）*
+
+*尾调用由于是函数的最后一步操作，所以不需要保留外层函数的调用帧，因为调用位置，内部变量等信息都不会再用到了，只要直接用内部函数的调用帧，取代外部函数的调用帧就可以了。*
+
+> 注意：只有不再用到外层函数的内部变量，内层函数的调用帧才会取代外层函数的调用帧，否则无法进行“尾调用优化”
+
+**尾递归**
+
+函数尾调用自身，称为尾递归
+
+计算n的阶乘
+
+```javascript
+// 非尾递归写法复杂度O(n)
+
+function factorial(n) {
+    if (n === 1) return 1
+    return n * factiorial(n - 1)
+}
+```
+
+```javascript
+// 尾递归写法复杂度O(1)
+
+function factorial(n, total) {
+    if (n === 1) return total
+    return factorial(n - 1, n * total)
+}
+```
+
+Fibonacci数列
+
+```javascript
+// 非尾递归
+
+function Fibonacci(n) {
+    if (n <= 1) return 1
+    return Fibonacci(n - 1) + Fibonacci(n - 2)
+}
+```
+
+```javascript
+// 尾递归
+
+function Fibonacci(n, ac1 = 1, ac2 = 1) {
+    if (n <= 1) return ac2
+    return Fibonacci(n - 1, ac2, ac2 + ac1)
+}
+```
+
+递归本身是一种循环操作。纯粹的函数式编程语言没有循环操作命令，所有循环使用递归实现。所以一旦使用递归，就最好使用尾递归。
+
+**递归函数的改写**
+
+把所有用到的内部变量改写成函数参数。这样就导致函数接收多个参数，不够直观。
+
+解决方法一
+
+```javascript
+function tailFactorial(n, total) {
+    if (n === 1) return total
+    return tailFactorial(n - 1, n * total)
+}
+
+function factorial(n) {
+    return tailFactorial(n, 1)
+}
+
+factorial(5)
+```
+
+解决方法二
+
+利用柯里化（currying）
+
+```javascript
+function currying(fn, n) {
+    return function (m) {
+        return fn.call(this, m, n)
+    }
+}
+
+function tailFactorial(n, total) {
+    if (n === 1) return total
+    return tailFactorial(n - 1, n * total)
+}
+
+const factorial = currying(tailFactorial, 1)
+factorial(5)
+```
+
+方法三
+
+默认参数
+
+```javascript
+function factorial(n, total = 1) {
+    if (n === 1) return total
+    return factorial(n - 1, n * total)
+}
+
+factorial(5)
+```
+
+**严格模式**
+
+ES6的尾调用优化只在严格模式下有效。
+
+非严格模式下函数内部有两个变量，可以跟踪函数的调用栈
+
+- `func.arguments`: 返回调用时函数的参数。
+- `func.caller`: 返回调用当前函数的那个函数
+
+尾调用优化会导致上面两个变量失真。严格模式禁止使用这两个变量。
+
+**尾递归优化的实现**
+
+思路：将递归转化为循化
+
+正常的递归函数
+
+```javascript
+function sum(x, y) {
+    if (y > 0) {
+        return sum(x + 1, y - 1)
+    } else {
+        return x
+    }
+}
+```
+
+利用蹦床函数把递归转化为循环执行
+
+```javascript
+function trampoline(f) {
+    while (f && f instanceof Function) {
+        f = f()
+    }
+    return f
+}
+/*
+    接受一个函数f作为参数，只要f执行后返回一个函数，就继续执行。否则直接返回结果。这里是返回一个函数，然后执行该函数，而不是函数邻面调用函数。
+*/
+```
+
+将原递归函数改写成每一步返回另一个函数
+
+```javascript
+function sum(x, y) {
+    if (y > 0) {
+        return sum.bind(null, x + 1, y - 1)
+    } else {
+        return x
+    }
+}
+```
+
+利用蹦床函数执行sun
+
+```javascript
+trampoline(sum(1, 1000))
+```
+
+真正尾递归优化实现
+
+```javascript
+function tco(f) {
+    var value
+    var active = false
+    var accumulated = []
+    return function accumulator() {
+        accumulated.push(arguments)
+        if (!active) {
+            active = true
+            while (accumulated.length) {
+                value = f.apply(this, accumulated.shift())
+            }
+            active = false
+            return value
+        }
+    }
+}
+
+var sum = tco(function(x, y) {
+    if (y > 0) {
+        return sum(x + 1, y - 1)
+    } else {
+        return x
+    }
+})
+
+sum(1, 10000)
+```
+
+分析（本质是把递归变成了while循环）
+
+```javascript
+var sum = tco(function(x, y) {
+    if (y > 0) {
+        return sum(x + 1, y - 1)
+    } else {
+        return x
+    }
+})
+```
+
+调用之后`sum`是一个闭包函数，可以定义为如下
+
+```javascript
+var sum = function () {
+    accumulated.push(arguments)
+    if (!active) {
+        active = true
+        while (accmulated.length) {
+            value = function (x, y) {
+                if (y > 0) {
+                    return sum(x + 1, y - 1)
+                } else {
+                    return x
+                }
+            }.apply(this, accumulated.shift())
+        }
+        active = false
+        return value
+    }
+}
+```
+
+函数内部变量`value`，`active`, `accumulated`是闭包形成的私有变量
+
+```javascript
+sum(1, 100000)
+```
+
+执行`sum`
+
+1. `accumulated = [{0: 1, 1: 100000}]`
+2. 进入`if`
+3. `active = true`
+4. 进入`while`
+5. 
+```javascript
+value = (function(x, y) {
+    if (y > 0) {
+        return sum(x + 1, y - 1)
+    } else {
+        return x
+    }
+}(1, 100000))
+```
+
+等价于
+
+```javascript
+value = sum(1 + 1, 100000 - 1)
+```
+6. 进入`sum(1 + 1, 100000 - 1)`后，不进入`if`代码块，直接返回`undefined`但是`accumulated = [{0: 2, 1: 99999}]`
+7. 第五步等价于`value = undefined`
+8. 此时私有变量`accumulated = [{0: 2, 1: 99999}]`，`while`语句通过条件，进入循化
