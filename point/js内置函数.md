@@ -1,0 +1,9 @@
+- Object
+- Array
+- Boolean
+- String
+- Number
+- RegExp
+- Error
+- Date
+- Function
