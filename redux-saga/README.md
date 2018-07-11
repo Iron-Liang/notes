@@ -18,4 +18,4 @@ dispatch an action !
 
 **`race`**
 
-多个Effects之间启动竞赛
+多个Effects之间启动竞赛，自动取消
