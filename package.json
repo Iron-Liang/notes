@@ -1,0 +1,19 @@
+{
+  "name": "notes",
+  "version": "0.1.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhellscream/notes.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jhellscream/notes/issues"
+  },
+  "homepage": "https://github.com/jhellscream/notes#readme"
+}
